@@ -54,6 +54,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 **Response:**
 ```json
 {
+  "success": true,
   "message": "Login success",
   "data": "token"
 }
