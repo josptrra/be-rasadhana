@@ -34,7 +34,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 **Response:**
 ```json
 {
-  "status": true,
+  "success": true,
   "message": "User telah didaftarkan"
 }
 ```
@@ -73,7 +73,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 **Response:**
 ```json
 {
-  "status": true,
+  "success": true,
   "data": {
     "_id": "6741b6fc61ae0a167581214e",
     "name": "Julio",
