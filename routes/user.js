@@ -90,7 +90,7 @@ router.patch('/update/:userId', async (req, res) => {
 
     await user.save();
 
-    res.status(201).json({success: true, user, message: 'Berhasil update' });
+    res.status(201).json({success: true,  message: 'Berhasil update', user });
   } catch (err) {
     res.status(400).json({success: false, message: err.message });
   }

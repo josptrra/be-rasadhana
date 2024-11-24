@@ -34,8 +34,8 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 **Response:**
 ```json
 {
-  "status": "Success",
-  "data": "User telah didaftarkan"
+  "success": true,
+  "message": "User telah didaftarkan"
 }
 ```
 
@@ -54,8 +54,9 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 **Response:**
 ```json
 {
+  "success": true,
   "message": "Login success",
-  "data": ""
+  "data": "token"
 }
 ```
 
@@ -67,13 +68,13 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 **Request:**
 ```json
 {
-  "token": ""
+  "token": "token"
 }
 ```
 **Response:**
 ```json
 {
-  "status": "ok",
+  "success": true,
   "data": {
     "_id": "6741b6fc61ae0a167581214e",
     "name": "Julio",
@@ -140,6 +141,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 **Response:**
 ```json
 {
+  "success": true,
   "message": "Berhasil update",
   "user": {
     "_id": "6741b6fc61ae0a167581214e",
