@@ -54,7 +54,7 @@ router.post('/login-user', async (req, res) => {
 });
 
 router.post('/userdata', async (req, res) => {
-  const { token } = req.body;
+  const token = req.headers.authorization;
   try {
     const user = jwt.verify(token, process.env.JWT_SECRET);
     const useremail = user.email;
@@ -83,16 +83,20 @@ router.patch('/update/:userId', async (req, res) => {
         .json({ success: false, message: 'Pengguna tidak ditemukan' });
     }
 
-    if (req.body.email) {
-      user.email = req.body.email;
-    }
     if (req.body.name) {
       user.name = req.body.name;
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Field name diperlukan untuk memperbarui nama',
+      });
     }
 
     await user.save();
 
-    res.status(201).json({ success: true, user, message: 'Berhasil update' });
+    res
+      .status(201)
+      .json({ success: true, user, message: 'Nama berhasil diupdate' });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -107,9 +111,9 @@ router.post('/forgot-password', async (req, res) => {
         .status(404)
         .json({ success: false, message: 'Email tidak terdaftar' });
     }
-    const token = crypto.randomInt(10000, 99999).toString();
+    const otp = crypto.randomInt(10000, 99999).toString();
 
-    user.resetToken = token;
+    user.resetToken = otp;
     await user.save();
 
     var transporter = nodemailer.createTransport({
@@ -124,14 +128,14 @@ router.post('/forgot-password', async (req, res) => {
       from: process.env.EMAIL,
       to: email,
       subject: 'Reset Password',
-      text: `Verifikasi token: ${token}`,
+      text: `Verifikasi OTP: ${otp}`,
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         return res.json({ success: false, message: 'error mengirim email' });
       } else {
-        return res.json({ success: true, message: 'email sent', token });
+        return res.json({ success: true, message: 'email sent', otp });
       }
     });
   } catch (err) {
@@ -140,20 +144,19 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 router.post('/reset-password', async (req, res) => {
-  const { token, newPassword } = req.body;
+  const { otp, newPassword } = req.body;
 
   try {
-    const user = await User.findOne({ resetToken: token });
+    const user = await User.findOne({ resetToken: otp });
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'invalid reset token' });
+      return res.status(400).json({ success: false, message: 'Invalid OTP' });
     }
 
     const encryptedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = encryptedPassword;
+    user.resetToken = null;
     await user.save();
 
     return res
