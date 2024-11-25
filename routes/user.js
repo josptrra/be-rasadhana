@@ -14,12 +14,10 @@ const router = express.Router();
 
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
-  const oldEmailUser = await User.findOne({ email });
-  const oldNamelUser = await User.findOne({ name });
 
-  if (oldNamelUser) {
-    return res.send({ success: false, message: 'Nama sudah digunakan' });
-  } else if (oldEmailUser) {
+  const oldEmailUser = await User.findOne({ email });
+
+  if (oldEmailUser) {
     return res.send({ success: false, message: 'Email sudah digunakan' });
   }
 
@@ -33,7 +31,7 @@ router.post('/register', async (req, res) => {
     });
     res.send({ success: true, message: 'User telah didaftarkan' });
   } catch (error) {
-    res.send({ success: false, message: error });
+    res.send({ success: false, message: error.message });
   }
 });
 
