@@ -9,6 +9,8 @@ const app = express();
 
 const PORT = process.env.PORT || 8080;
 const mongoUrl = process.env.MONGO_URL;
+// Middleware untuk parsing application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 mongoose
