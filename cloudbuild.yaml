@@ -3,13 +3,13 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'asia-southeast2-docker.pkg.dev/rasadhana-442623/be-rasadhana/be-rasadhana-image:$BUILD_ID'
+      - 'asia-southeast2-docker.pkg.dev/rasadhana/be-rasadhana/be-rasadhana-image:$BUILD_ID'
       - '.'
 
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'asia-southeast2-docker.pkg.dev/rasadhana-442623/be-rasadhana/be-rasadhana-image:$BUILD_ID'
+      - 'asia-southeast2-docker.pkg.dev/rasadhana/be-rasadhana/be-rasadhana-image:$BUILD_ID'
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
@@ -18,16 +18,16 @@ steps:
       - 'deploy'
       - 'be-rasadhana' # Nama service di Cloud Run
       - '--image'
-      - 'asia-southeast2-docker.pkg.dev/rasadhana-442623/be-rasadhana/be-rasadhana-image:$BUILD_ID'
+      - 'asia-southeast2-docker.pkg.dev/rasadhana/be-rasadhana/be-rasadhana-image:$BUILD_ID'
       - '--region'
       - 'asia-southeast2'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
-timeout: '1200s' # Waktu timeout untuk pipeline (opsional)
+      - '--timeout=600s' # Perpanjang timeout
+      - '--port=8080' # Pastikan port 8080 digunakan
 
+timeout: '1200s'
 
-
-
-
-
+options:
+  logging: CLOUD_LOGGING_ONLY
