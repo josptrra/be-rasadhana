@@ -24,10 +24,10 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
-timeout: '1200s' # Waktu timeout untuk pipeline (opsional)
+      - '--timeout=600s' # Perpanjang timeout
+      - '--port=8080' # Pastikan port 8080 digunakan
 
+timeout: '1200s'
 
-
-
-
-
+options:
+  logging: CLOUD_LOGGING_ONLY
