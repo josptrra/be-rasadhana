@@ -38,8 +38,8 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 
 ```json
 {
-  "status": "Success",
-  "data": "User telah didaftarkan"
+  "success": true,
+  "message": "User telah didaftarkan"
 }
 ```
 

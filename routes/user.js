@@ -53,9 +53,11 @@ router.post('/login-user', async (req, res) => {
   }
 });
 
-router.post('/userdata', async (req, res) => {
-  const token = req.headers.authorization;
+router.get('/userdata', async (req, res) => {
   try {
+    const bearerToken = req.headers.authorization
+    const token = bearerToken?.split('Bearer ')[1]
+    
     const user = jwt.verify(token, process.env.JWT_SECRET);
     const useremail = user.email;
 
@@ -97,6 +99,7 @@ router.patch('/update/:userId', async (req, res) => {
     res
       .status(201)
       .json({ success: true, user, message: 'Nama berhasil diupdate' });
+    
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
