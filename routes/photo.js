@@ -4,6 +4,9 @@ import path from 'path';
 import { Storage } from '@google-cloud/storage';
 import { UserPhoto } from '../models/userPhotoModel.js';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +19,8 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
 const router = express.Router();
 
 const storage = new Storage();
-// const bucketName = process.env.GCLOUD_BUCKET_NAME;
-const bucketName = 'rasadhana-images'; // aku hardcode-in sementara, soalnya kalo ditaro di env ga kebaca kocak
+const bucketName = process.env.GCLOUD_BUCKET_NAME;
+// const bucketName = 'rasadhana-images'; // aku hardcode-in sementara, soalnya kalo ditaro di env ga kebaca kocak
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/upload-photo', upload.single('photo'), async (req, res) => {
