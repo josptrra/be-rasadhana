@@ -1,0 +1,31 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'asia-southeast2-docker.pkg.dev/rasadhana-app/be-rasadhana/be-rasadhana-image:$BUILD_ID'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'asia-southeast2-docker.pkg.dev/rasadhana-app/be-rasadhana/be-rasadhana-image:$BUILD_ID'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'be-rasadhana'
+      - '--image'
+      - 'asia-southeast2-docker.pkg.dev/rasadhana-app/be-rasadhana/be-rasadhana-image:$BUILD_ID'
+      - '--region'
+      - 'asia-southeast2'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--timeout'
+      - '300s'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
