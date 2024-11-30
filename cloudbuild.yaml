@@ -16,7 +16,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'be-rasadhana' # Nama service di Cloud Run
+      - 'be-rasadhana'
       - '--image'
       - 'asia-southeast2-docker.pkg.dev/rasadhana/be-rasadhana/be-rasadhana-image:$BUILD_ID'
       - '--region'
@@ -24,10 +24,8 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
-      - '--timeout=600s' # Perpanjang timeout
-      - '--port=8080' # Pastikan port 8080 digunakan
-
-timeout: '1200s'
+      - '--timeout'
+      - '300s'
 
 options:
   logging: CLOUD_LOGGING_ONLY
