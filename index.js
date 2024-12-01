@@ -18,7 +18,7 @@ if (!process.env.GCLOUD_BUCKET_NAME) {
   throw new Error('GCLOUD_BUCKET_NAME is not set in .env');
 }
 
-//jika mau menjalankan di local
+// unkomen jika mau menjalankan di local
 // if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
 //   throw new Error(
 //     'GOOGLE_APPLICATION_CREDENTIALS is not set or file is missing'
@@ -43,6 +43,7 @@ mongoose
 
 app.use('/auth', UserRouter);
 app.use('/photos', PhotoRouter);
+app.use('/api/recipes', RecipeRouter);
 
 app.get('/', (req, res) => {
   res.send('Welcome to the API Rasadhana versi 1.0');
