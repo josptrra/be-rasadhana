@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { UserRouter } from './routes/user.js';
 import { PhotoRouter } from './routes/photo.js';
+import { RecipeRouter } from './routes/recipe.js';
 
 import mongoose from 'mongoose';
 
@@ -19,14 +20,14 @@ if (!process.env.GCLOUD_BUCKET_NAME) {
 }
 
 // unkomen jika mau menjalankan di local
-// if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-//   throw new Error(
-//     'GOOGLE_APPLICATION_CREDENTIALS is not set or file is missing'
-//   );
-// }
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  throw new Error(
+    'GOOGLE_APPLICATION_CREDENTIALS is not set or file is missing'
+  );
+}
 
-// process.env.GOOGLE_APPLICATION_CREDENTIALS =
-//   './config/service-account-key.json';
+process.env.GOOGLE_APPLICATION_CREDENTIALS =
+  './config/service-account-key.json';
 
 // Middleware untuk parsing application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
@@ -43,7 +44,7 @@ mongoose
 
 app.use('/auth', UserRouter);
 app.use('/photos', PhotoRouter);
-app.use('/api/recipes', RecipeRouter);
+app.use('/recipes', RecipeRouter);
 
 app.get('/', (req, res) => {
   res.send('Welcome to the API Rasadhana versi 1.0');

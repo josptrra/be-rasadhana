@@ -235,4 +235,60 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
+### 9. **DETECT INGREDIENTS + RECIPES**
+
+**URL:** `POST /recipes/predict-recipe`  
+**Endpoint:** [http://localhost:33000/recipes/predict-recipe](http://localhost:33000/recipes/predict-recipe)
+**Request: Body - raw**
+
+```json
+{
+  "userId": "",
+  "photoUrl": "https://storage.googleapis.com/rasadhana-app-images/kentang.jpg"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Hasil prediksi berhasil disimpan",
+  "detectedIngredient": "kentang",
+  "recipes": ["Kentang Goreng", "Perkedel Kentang"]
+}
+```
+
+### 10. **GET PREDICTIONS LIST BY USER ID**
+
+**URL:** `GET /user-predictions/:userId`  
+**Endpoint:** [http://localhost:33000/user-predictions/:userId](http://localhost:33000/user-predictions/:userId)
+**Request: None**
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "60c72b2f9b1b1d2b6c1e1c1f",
+      "userId": "60b6c7c09c0c8e2c4cded56f",
+      "photoUrl": "https://example.com/path/to/photo1.jpg",
+      "detectedIngredient": "kentang",
+      "recipes": ["Kentang Goreng", "Perkedel Kentang"],
+      "createdAt": "2024-12-01T12:00:00Z"
+    },
+    {
+      "_id": "60c72b2f9b1b1d2b6c1e1c2f",
+      "userId": "60b6c7c09c0c8e2c4cded56f",
+      "photoUrl": "https://example.com/path/to/photo2.jpg",
+      "detectedIngredient": "tomat",
+      "recipes": ["Sup Tomat", "Salad Tomat"],
+      "createdAt": "2024-12-02T14:00:00Z"
+    }
+  ]
+}
+```
+
 ---
