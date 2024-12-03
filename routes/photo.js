@@ -10,7 +10,7 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 
-// // Jika menjalankan di lokal
+// Jika menjalankan di lokal
 // const __dirname = path.dirname(__filename);
 
 // process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
