@@ -21,7 +21,7 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
 );
 
 const storage = new Storage();
-const bucketName = process.env.GCLOUD_BUCKET_NAME;
+const recipeBucketName = process.env.GCLOUD_BUCKET_NAME_RECIPES;
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post(
@@ -39,7 +39,7 @@ router.post(
 
     try {
       const blob = storage
-        .bucket(bucketName)
+        .bucket(recipeBucketName)
         .file(`recipes/${Date.now()}-${file.originalname}`);
       const blobStream = blob.createWriteStream({
         resumable: false,
@@ -54,7 +54,7 @@ router.post(
       });
 
       blobStream.on('finish', async () => {
-        const recipeImageUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
+        const recipeImageUrl = `https://storage.googleapis.com/${recipeBucketName}/${blob.name}`;
 
         // Simpan resep baru dengan foto di URL
         const newRecipe = new Recipe({
@@ -116,7 +116,6 @@ router.patch('/update/:id', upload.single('recipeImage'), async (req, res) => {
       });
     }
 
-    // Update data resep
     if (title) recipe.title = title;
     if (ingredients) recipe.ingredients = ingredients;
     if (steps) recipe.steps = steps;
@@ -124,7 +123,7 @@ router.patch('/update/:id', upload.single('recipeImage'), async (req, res) => {
     // Jika ada file foto baru, upload foto dan simpan URL-nya
     if (file) {
       const blob = storage
-        .bucket(bucketName)
+        .bucket(recipeBucketName)
         .file(`recipes/${Date.now()}-${file.originalname}`);
       const blobStream = blob.createWriteStream({
         resumable: false,
@@ -140,7 +139,7 @@ router.patch('/update/:id', upload.single('recipeImage'), async (req, res) => {
       });
 
       blobStream.on('finish', async () => {
-        const recipeImageUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
+        const recipeImageUrl = `https://storage.googleapis.com/${recipeBucketName}/${blob.name}`;
         recipe.recipeImage = recipeImageUrl;
         await recipe.save();
 
@@ -184,7 +183,7 @@ router.delete('/delete/:id', async (req, res) => {
 
     // Menghapus gambar dari Google Cloud Storage (opsional)
     const fileName = recipe.recipeImage.split('/').pop(); // Ambil nama file dari URL
-    const file = storage.bucket(bucketName).file(`recipes/${fileName}`);
+    const file = storage.bucket(recipeBucketName).file(`recipes/${fileName}`);
 
     await file.delete(); // Menghapus file gambar dari GCS
 
