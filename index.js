@@ -18,12 +18,12 @@ if (!process.env.GCLOUD_BUCKET_NAME) {
   throw new Error('GCLOUD_BUCKET_NAME is not set in .env');
 }
 
-// unkomen jika mau menjalankan di local
-if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  throw new Error(
-    'GOOGLE_APPLICATION_CREDENTIALS is not set or file is missing'
-  );
-}
+// // unkomen jika mau menjalankan di local
+// if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+//   throw new Error(
+//     'GOOGLE_APPLICATION_CREDENTIALS is not set or file is missing'
+//   );
+// }
 
 process.env.GOOGLE_APPLICATION_CREDENTIALS =
   './config/service-account-key.json';
