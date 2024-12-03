@@ -10,20 +10,20 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 
-//jika mau menjalankan di local
-// const __dirname = path.dirname(__filename);
+// Jika menjalankan di lokal
+const __dirname = path.dirname(__filename);
 
-// process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
-//   __dirname,
-//   '../config/service-account-key.json'
-// );
+process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
+  __dirname,
+  '../config/service-account-key.json'
+);
 
 const router = express.Router();
-
 const storage = new Storage();
 const bucketName = process.env.GCLOUD_BUCKET_NAME;
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Route untuk upload foto
 router.post('/upload-photo', upload.single('photo'), async (req, res) => {
   const { userId } = req.body;
   const file = req.file;
@@ -35,6 +35,7 @@ router.post('/upload-photo', upload.single('photo'), async (req, res) => {
   }
 
   try {
+    // Upload foto ke GCS
     const blob = storage.bucket(bucketName).file(file.originalname);
     const blobStream = blob.createWriteStream({
       resumable: false,
@@ -49,8 +50,10 @@ router.post('/upload-photo', upload.single('photo'), async (req, res) => {
     });
 
     blobStream.on('finish', async () => {
+      // URL foto yang dapat diakses secara publik
       const photoUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
 
+      // Menyimpan URL foto ke MongoDB
       const newPhoto = new UserPhoto({
         userId,
         photoUrl,
@@ -71,6 +74,7 @@ router.post('/upload-photo', upload.single('photo'), async (req, res) => {
   }
 });
 
+// Route untuk mengambil semua foto berdasarkan userId
 router.get('/:userId', async (req, res) => {
   const { userId } = req.params;
 
@@ -83,6 +87,28 @@ router.get('/:userId', async (req, res) => {
     }
 
     res.status(200).json({ success: true, data: photos });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Route untuk mengambil foto terbaru berdasarkan userId
+router.get('/latest/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Ambil foto terbaru berdasarkan userId dan diurutkan berdasarkan uploadedAt
+    const latestPhoto = await UserPhoto.findOne({ userId: userId })
+      .sort({ uploadedAt: -1 }) // Sortir berdasarkan uploadedAt
+      .exec();
+
+    if (!latestPhoto) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Foto tidak ditemukan' });
+    }
+
+    res.status(200).json({ success: true, data: latestPhoto });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

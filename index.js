@@ -18,15 +18,15 @@ if (!process.env.GCLOUD_BUCKET_NAME) {
   throw new Error('GCLOUD_BUCKET_NAME is not set in .env');
 }
 
-//jika mau menjalankan di local
-// if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-//   throw new Error(
-//     'GOOGLE_APPLICATION_CREDENTIALS is not set or file is missing'
-//   );
-// }
+// unkomen jika mau menjalankan di local
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  throw new Error(
+    'GOOGLE_APPLICATION_CREDENTIALS is not set or file is missing'
+  );
+}
 
-// process.env.GOOGLE_APPLICATION_CREDENTIALS =
-//   './config/service-account-key.json';
+process.env.GOOGLE_APPLICATION_CREDENTIALS =
+  './config/service-account-key.json';
 
 // Middleware untuk parsing application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
@@ -45,7 +45,7 @@ app.use('/auth', UserRouter);
 app.use('/photos', PhotoRouter);
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the API Rasadhana versi 2.0');
+  res.send('Welcome to the API Rasadhana versi 1.0');
 });
 
 app.listen(PORT, () => {
