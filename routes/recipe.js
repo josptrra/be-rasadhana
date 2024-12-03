@@ -1,72 +1,205 @@
 import express from 'express';
-import { predictIngredient, getRecipes } from './helper.js';
-import { Prediction } from '../models/predictionModel.js';
+import multer from 'multer';
+import { Recipe } from '../models/recipeModel.js';
+import { Storage } from '@google-cloud/storage';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config();
 
 const router = express.Router();
 
-router.post('/predict-recipe', async (req, res) => {
-  const { userId, photoUrl } = req.body;
+const __filename = fileURLToPath(import.meta.url);
 
-  if (!photoUrl || !userId) {
-    return res.status(400).json({
-      success: false,
-      message: 'User ID atau Photo URL tidak diberikan',
-    });
+// kalo mau jalanin di localmenjalankan di local
+const __dirname = path.dirname(__filename);
+
+process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
+  __dirname,
+  '../config/service-account-key.json'
+);
+
+const storage = new Storage();
+const bucketName = process.env.GCLOUD_BUCKET_NAME;
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.post(
+  '/create-recipe',
+  upload.single('recipeImage'),
+  async (req, res) => {
+    const { title, ingredients, steps } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Tidak ada file yang diunggah' });
+    }
+
+    try {
+      const blob = storage
+        .bucket(bucketName)
+        .file(`recipes/${Date.now()}-${file.originalname}`);
+      const blobStream = blob.createWriteStream({
+        resumable: false,
+        contentType: file.mimetype,
+      });
+
+      blobStream.on('error', (err) => {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ success: false, message: 'Gagal upload ke GCS' });
+      });
+
+      blobStream.on('finish', async () => {
+        const recipeImageUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
+
+        // Simpan resep baru dengan foto di URL
+        const newRecipe = new Recipe({
+          title,
+          ingredients,
+          steps,
+          recipeImage: recipeImageUrl,
+        });
+        await newRecipe.save();
+
+        res.status(201).json({
+          success: true,
+          message: 'Resep berhasil diunggah',
+          recipeImageUrl,
+        });
+      });
+
+      blobStream.end(file.buffer);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: error.message });
+    }
   }
+);
 
+router.get('/allrecipe', async (req, res) => {
   try {
-    // Prediksi bahan makanan
-    const detectedIngredient = await predictIngredient(photoUrl);
-
-    // Dapatkan resep berdasarkan bahan makanan
-    const recipes = await getRecipes(detectedIngredient);
-
-    // Simpan hasil prediksi ke database
-    const newPrediction = new Prediction({
-      userId,
-      photoUrl,
-      detectedIngredient,
-      recipes,
-    });
-    await newPrediction.save();
-
+    const recipes = await Recipe.find();
+    if (!recipes || recipes.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tidak ada resep ditemukan',
+      });
+    }
     res.status(200).json({
       success: true,
-      detectedIngredient,
-      recipes,
-      message: 'Hasil prediksi berhasil disimpan',
+      recipes: recipes,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Gagal memproses prediksi dan menyimpan hasil',
+      message: 'Terjadi kesalahan saat mengambil data resep',
     });
   }
 });
 
-router.get('/user-predictions/:userId', async (req, res) => {
-  const { userId } = req.params;
+router.patch('/update/:id', upload.single('recipeImage'), async (req, res) => {
+  const { id } = req.params;
+  const { title, ingredients, steps } = req.body;
+  const file = req.file;
 
   try {
-    const predictions = await Prediction.find({ userId }).sort({
-      createdAt: -1,
-    });
-    if (!predictions.length) {
+    const recipe = await Recipe.findById(id);
+    if (!recipe) {
       return res.status(404).json({
         success: false,
-        message: 'Tidak ada prediksi untuk user ini',
+        message: 'Resep tidak ditemukan',
       });
     }
 
-    res.status(200).json({
-      success: true,
-      data: predictions,
-    });
+    // Update data resep
+    if (title) recipe.title = title;
+    if (ingredients) recipe.ingredients = ingredients;
+    if (steps) recipe.steps = steps;
+
+    // Jika ada file foto baru, upload foto dan simpan URL-nya
+    if (file) {
+      const blob = storage
+        .bucket(bucketName)
+        .file(`recipes/${Date.now()}-${file.originalname}`);
+      const blobStream = blob.createWriteStream({
+        resumable: false,
+        contentType: file.mimetype,
+      });
+
+      blobStream.on('error', (err) => {
+        console.error(err);
+        return res.status(500).json({
+          success: false,
+          message: 'Gagal upload ke Google Cloud Storage',
+        });
+      });
+
+      blobStream.on('finish', async () => {
+        const recipeImageUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
+        recipe.recipeImage = recipeImageUrl;
+        await recipe.save();
+
+        res.status(200).json({
+          success: true,
+          message: 'Resep berhasil diperbarui',
+          recipe,
+        });
+      });
+
+      blobStream.end(file.buffer);
+    } else {
+      // Jika tidak ada gambar yang di-upload, hanya update data lain
+      await recipe.save();
+      res.status(200).json({
+        success: true,
+        message: 'Resep berhasil diperbarui',
+        recipe,
+      });
+    }
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Gagal mengambil data prediksi',
+      message: 'Terjadi kesalahan saat memperbarui resep',
+    });
+  }
+});
+
+router.delete('/delete/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const recipe = await Recipe.findById(id);
+    if (!recipe) {
+      return res.status(404).json({
+        success: false,
+        message: 'Resep tidak ditemukan',
+      });
+    }
+
+    // Menghapus gambar dari Google Cloud Storage (opsional)
+    const fileName = recipe.recipeImage.split('/').pop(); // Ambil nama file dari URL
+    const file = storage.bucket(bucketName).file(`recipes/${fileName}`);
+
+    await file.delete(); // Menghapus file gambar dari GCS
+
+    // Hapus resep dari database
+    await recipe.remove();
+
+    res.status(200).json({
+      success: true,
+      message: 'Resep berhasil dihapus',
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Terjadi kesalahan saat menghapus resep',
     });
   }
 });

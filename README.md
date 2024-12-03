@@ -235,17 +235,17 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
-### 9. **DETECT INGREDIENTS + RECIPES**
+### 9. **POST CREATE Recipe - Homepage**
 
-**URL:** `POST /recipes/predict-recipe`  
-**Endpoint:** [http://localhost:33000/recipes/predict-recipe](http://localhost:33000/recipes/predict-recipe)
-**Request: Body - raw**
+**URL:** `POST /recipes/create-recipe`  
+**Endpoint:** [http://localhost:33000/recipes/create-recipe](http://localhost:33000/recipes/create-recipe)
+**Request: Body: form-data**
 
 ```json
-{
-  "userId": "",
-  "photoUrl": "https://storage.googleapis.com/rasadhana-app-images/kentang.jpg"
-}
+1. Key = title, type = text, value = judul resep
+2. Key = ingredients, type = text, value = bahan bahan
+3. Key = steps, type = text, value = langkah pengolahan
+4. Key = recipeImages, type = file, value = gambar
 ```
 
 **Response:**
@@ -253,39 +253,30 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 ```json
 {
   "success": true,
-  "message": "Hasil prediksi berhasil disimpan",
-  "detectedIngredient": "kentang",
-  "recipes": ["Kentang Goreng", "Perkedel Kentang"]
+  "message": "Resep berhasil diunggah",
+  "recipeImageUrl": "https://storage.googleapis.com/rasadhana-app-images/recipes/1733212667546-ayam-goreng-tulang-lunak.jpg"
 }
 ```
 
-### 10. **GET PREDICTIONS LIST BY USER ID**
+### 10. **GET All Recipe - Homepage**
 
-**URL:** `GET /user-predictions/:userId`  
-**Endpoint:** [http://localhost:33000/user-predictions/:userId](http://localhost:33000/user-predictions/:userId)
-**Request: None**
+**URL:** `GET /recipes/allrecipe`  
+**Endpoint:** [http://localhost:33000/recipes/allrecipe](http://localhost:33000/recipes/allrecipe)
+**Request: none**
 
 **Response:**
 
 ```json
 {
   "success": true,
-  "data": [
+  "recipes": [
     {
-      "_id": "60c72b2f9b1b1d2b6c1e1c1f",
-      "userId": "60b6c7c09c0c8e2c4cded56f",
-      "photoUrl": "https://example.com/path/to/photo1.jpg",
-      "detectedIngredient": "kentang",
-      "recipes": ["Kentang Goreng", "Perkedel Kentang"],
-      "createdAt": "2024-12-01T12:00:00Z"
-    },
-    {
-      "_id": "60c72b2f9b1b1d2b6c1e1c2f",
-      "userId": "60b6c7c09c0c8e2c4cded56f",
-      "photoUrl": "https://example.com/path/to/photo2.jpg",
-      "detectedIngredient": "tomat",
-      "recipes": ["Sup Tomat", "Salad Tomat"],
-      "createdAt": "2024-12-02T14:00:00Z"
+      "_id": "674eb9fbad215844949c2e9e",
+      "title": "Ayam Goreng Tulang Lunak",
+      "ingredients": "1 kg ayam  dipotong sesuai selera jangan kecil2 ya   2 batang serai  memarkan   4 lembar daun jeruk  7 butir bawang putih  haluskan   1 sdm ketumbar  haluskan   3 ruas jari laos  haluskan   3 ruas jari kunyit  haluskan   2 butir kemiri  haluskan   secukupnya garam  secukupnya air  tuk ukep ayam   secukupnya minyak goreng",
+      "steps": "Haluskan bumbu2nya (BaPut, ketumbar, kemiri, kunyit, Laos, garam) hingga halus, sisihkan--Campur kan bumbu halus tadi dengan ayam yg sudah dicuci bersih dan sudah dipotong didalam panci presto. Uleni sampai tercampur rata.--Tambahkan air hingga ayam tenggelam semua. Masukkan serai dan daun jeruk nya kedalam rendaman ayam. Tutup panci presto rebus/ ukep presto sampai kurleb 45 menit. Dengan api sedang.--Setelah proses ukep presto selesai, tunggu suhu dingin ruang. Lalu goreng ayam dengan minyak goreng api sedang sampai ayam berwarna kecoklatan.--Matang dan sajikan ayam selagi hangat bersama nasi putih, sambal dgn perasan jeruk nipis, lalapan.",
+      "recipeImage": "https://storage.googleapis.com/rasadhana-app-images/recipes/1733212667546-ayam-goreng-tulang-lunak.jpg",
+      "__v": 0
     }
   ]
 }
