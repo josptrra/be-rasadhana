@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { Storage } from '@google-cloud/storage';
-import { UserPhoto } from '../models/userPhotoModel.js';
+import { UserPhoto } from '../models/uploadPhotoModel.js';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 // import path from 'path';
