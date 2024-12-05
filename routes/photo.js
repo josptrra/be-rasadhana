@@ -1,22 +1,10 @@
 import express from 'express';
 import multer from 'multer';
 import { Storage } from '@google-cloud/storage';
-import { UserPhoto } from '../models/userPhotoModel.js';
-import { fileURLToPath } from 'url';
+import { UserPhoto } from '../models/uploadPhotoModel.js';
 import dotenv from 'dotenv';
-// import path from 'path';
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-
-// Jika menjalankan di local
-// const __dirname = path.dirname(__filename);
-
-// process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
-//   __dirname,
-//   '../config/service-account-key.json'
-// );
 
 const router = express.Router();
 
