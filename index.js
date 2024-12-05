@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { UserRouter } from './routes/user.js';
 import { PhotoRouter } from './routes/photo.js';
+import { RecipeRouter } from './routes/recipe.js';
 
 import mongoose from 'mongoose';
 
