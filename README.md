@@ -39,13 +39,38 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 ```json
 {
   "success": true,
-  "message": "User telah didaftarkan"
+  "message": "Kode OTP telah dikirim ke email Anda"
 }
 ```
 
 ---
 
-### 2. **Login User**
+### 2. **Register OTP VERIFIER**
+
+**URL:** `POST /auth/verify-otp`  
+**Endpoint:** [http://localhost:33000/auth/verify-otp](http://localhost:33000/auth/verify-otp)  
+**Request:**
+
+```json
+{
+  "email": "didallforus@gmail.com",
+  "otp": "17519",
+  "password": "password123"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Pendaftaran berhasil, akun telah dibuat"
+}
+```
+
+---
+
+### 3. **Login User**
 
 **URL:** `POST /auth/login-user`  
 **Endpoint:** [http://localhost:33000/auth/login-user](http://localhost:33000/auth/login-user)  
@@ -70,7 +95,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 
 ---
 
-### 3. **Get User Data**
+### 4. **Get User Data**
 
 **URL:** `GET /auth/userdata`  
 **Endpoint:** [http://localhost:33000/auth/userdata](http://localhost:33000/auth/userdata)  
@@ -99,7 +124,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 
 ---
 
-### 4. **Forgot Password**
+### 5. **Forgot Password**
 
 **URL:** `POST /auth/forgot-password`  
 **Endpoint:** [http://localhost:33000/auth/forgot-password](http://localhost:33000/auth/forgot-password)  
@@ -123,7 +148,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 
 ---
 
-### 5. **Reset Password**
+### 6. **Reset Password**
 
 **URL:** `POST /auth/reset-password`  
 **Endpoint:** [http://localhost:33000/auth/reset-password](http://localhost:33000/auth/reset-password)  
@@ -147,7 +172,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 
 ---
 
-### 6. **Update User by ID**
+### 7. **Update User by ID**
 
 **URL:** `PATCH /auth/update/:userId`  
 **Endpoint:** [http://localhost:33000/auth/update/:userId](http://localhost:33000/auth/update/:userId)
@@ -184,7 +209,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
-### 7. **Upload Photos**
+### 8. **Upload Photos**
 
 **URL:** `Post /photos/upload-photo`  
 **Endpoint:** [http://localhost:33000/photos/upload-photo](http://localhost:33000/auth/update/:userId)
@@ -205,7 +230,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
-### 8. **Get All Photos by UserID**
+### 9. **Get All Photos by UserID**
 
 **URL:** `GET /photos/:userId`  
 **Endpoint:** [http://localhost:33000/photos/:userId](http://localhost:33000/photos/:userId)
@@ -235,7 +260,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
-### 9. **POST CREATE Recipe - Homepage**
+### 10. **POST CREATE Recipe - Homepage**
 
 **URL:** `POST /recipes/create-recipe`  
 **Endpoint:** [http://localhost:33000/recipes/create-recipe](http://localhost:33000/recipes/create-recipe)
@@ -258,7 +283,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
-### 10. **GET All Recipe - Homepage**
+### 11. **GET All Recipe - Homepage**
 
 **URL:** `GET /recipes/allrecipe`  
 **Endpoint:** [http://localhost:33000/recipes/allrecipe](http://localhost:33000/recipes/allrecipe)
