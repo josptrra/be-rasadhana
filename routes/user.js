@@ -4,13 +4,8 @@ import { User } from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
-// import SwaggerUI from 'swagger-ui';
 
 const router = express.Router();
-
-// SwaggerUI({
-//   dom_id: '#myDomId',
-// });
 
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
@@ -21,35 +16,131 @@ router.post('/register', async (req, res) => {
     return res.send({ success: false, message: 'Email sudah digunakan' });
   }
 
-  const encryptedPassword = await bcrypt.hash(password, 10);
-
+  const otp = crypto.randomInt(10000, 99999).toString();
+  const otpExpiration = new Date();
+  otpExpiration.setMinutes(otpExpiration.getMinutes() + 10);
   try {
-    await User.create({
+    const user = new User({
       name: name,
       email: email,
-      password: encryptedPassword,
+      password: null,
+      resetToken: null,
+      registrationOtp: otp,
+      otpExpiration: otpExpiration,
     });
-    res.send({ success: true, message: 'User telah didaftarkan' });
+
+    await user.save();
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD_EMAIL,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: 'Verifikasi OTP untuk Pendaftaran',
+      text: `Kode OTP Anda untuk mendaftar adalah: ${otp}`,
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        return res.json({ success: false, message: 'Gagal mengirim email' });
+      } else {
+        return res.json({
+          success: true,
+          message: 'Kode OTP telah dikirim ke email Anda',
+        });
+      }
+    });
   } catch (error) {
     res.send({ success: false, message: error.message });
   }
 });
 
+router.post('/verify-otp', async (req, res) => {
+  const { email, otp, password } = req.body;
+
+  // Cari user berdasarkan email
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res
+      .status(404)
+      .json({ success: false, message: 'Email tidak terdaftar' });
+  }
+
+  // Cek apakah OTP yang dimasukkan sesuai dengan yang disimpan dan apakah sudah kedaluwarsa
+  if (user.registrationOtp !== otp) {
+    return res.status(400).json({ success: false, message: 'OTP tidak valid' });
+  }
+
+  // Cek apakah OTP sudah kedaluwarsa
+  if (new Date() > new Date(user.otpExpiration)) {
+    return res
+      .status(400)
+      .json({ success: false, message: 'OTP sudah kedaluwarsa' });
+  }
+
+  // Simpan password setelah OTP divalidasi
+  const encryptedPassword = await bcrypt.hash(password, 10);
+
+  user.password = encryptedPassword;
+  user.registrationOtp = null; // Hapus OTP setelah verifikasi berhasil
+  user.otpExpiration = null; // Hapus waktu kedaluwarsa OTP
+  await user.save();
+
+  return res.status(200).json({
+    success: true,
+    message: 'Pendaftaran berhasil, akun telah dibuat',
+  });
+});
+
 router.post('/login-user', async (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.send({
+      success: false,
+      message: 'Email dan password harus diisi',
+    });
+  }
+
   const oldUser = await User.findOne({ email });
 
   if (!oldUser) {
     return res.send({ success: false, message: 'Email Tidak terdaftar' });
   }
 
-  const validPassword = await bcrypt.compare(password, oldUser.password);
+  if (!oldUser.password) {
+    return res.send({
+      success: false,
+      message: 'Password tidak ditemukan di database',
+    });
+  }
 
-  if (validPassword) {
-    const token = jwt.sign({ email: oldUser.email }, process.env.JWT_SECRET);
-    return res.send({ success: true, message: 'Login berhasil', data: token });
-  } else {
-    return res.send({ success: false, message: 'Password anda salah' });
+  try {
+    const validPassword = await bcrypt.compare(password, oldUser.password);
+
+    if (validPassword) {
+      const token = jwt.sign({ email: oldUser.email }, process.env.JWT_SECRET);
+      return res.send({
+        success: true,
+        message: 'Login berhasil',
+        data: token,
+      });
+    } else {
+      return res.send({ success: false, message: 'Password anda salah' });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.send({
+      success: false,
+      message: 'Terjadi kesalahan saat memverifikasi password',
+    });
   }
 });
 
