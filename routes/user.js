@@ -53,6 +53,7 @@ router.post('/register', async (req, res) => {
         return res.json({
           success: true,
           message: 'Kode OTP telah dikirim ke email Anda',
+          otp
         });
       }
     });
