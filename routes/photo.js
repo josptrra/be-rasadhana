@@ -4,14 +4,14 @@ import { Storage } from '@google-cloud/storage';
 import { UserPhoto } from '../models/uploadPhotoModel.js';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-// import path from 'path';
+import path from 'path';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 
 // Jika menjalankan di local
-// const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 // process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
 //   __dirname,

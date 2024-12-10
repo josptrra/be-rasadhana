@@ -26,8 +26,8 @@ if (!process.env.GCLOUD_BUCKET_NAME) {
 //   );
 // }
 
-process.env.GOOGLE_APPLICATION_CREDENTIALS =
-  './config/service-account-key.json';
+// process.env.GOOGLE_APPLICATION_CREDENTIALS =
+//   './config/service-account-key.json';
 
 // Middleware untuk parsing application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));

@@ -86,12 +86,10 @@ router.post('/verify-register', async (req, res) => {
   const userPending = usersPendingVerification.get(email);
 
   if (!userPending) {
-    return res
-      .status(404)
-      .json({
-        success: false,
-        message: 'Email tidak terdaftar atau OTP sudah kedaluwarsa',
-      });
+    return res.status(404).json({
+      success: false,
+      message: 'Email tidak terdaftar atau OTP sudah kedaluwarsa',
+    });
   }
 
   if (userPending.otp !== otp) {
@@ -179,12 +177,10 @@ router.patch('/update/:userId', async (req, res) => {
     }
 
     if (!req.body.name) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: 'Field name diperlukan untuk memperbarui nama',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Field name diperlukan untuk memperbarui nama',
+      });
     }
 
     user.name = req.body.name;
