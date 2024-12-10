@@ -208,35 +208,6 @@ router.get('/userdata', async (req, res) => {
   }
 });
 
-router.patch('/update/:userId', async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Pengguna tidak ditemukan' });
-    }
-
-    if (!req.body.name) {
-      return res.status(400).json({
-        success: false,
-        message: 'Field name diperlukan untuk memperbarui nama',
-      });
-    }
-
-    user.name = req.body.name;
-    await user.save();
-
-    return res
-      .status(200)
-      .json({ success: true, user, message: 'Nama berhasil diupdate' });
-  } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
-  }
-});
-
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
@@ -276,62 +247,58 @@ router.post('/reset-password', async (req, res) => {
     .json({ success: true, message: 'Password berhasil direset' });
 });
 
-router.patch(
-  '/update-profile-photo',
-  upload.single('photo'),
-  async (req, res) => {
-    const { userId } = req.body;
-    const file = req.file;
+router.patch('/update/:userId', upload.single('photo'), async (req, res) => {
+  const { userId } = req.params;
+  const { name } = req.body;
+  const file = req.file;
 
-    if (!file) {
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
       return res
-        .status(400)
-        .json({ success: false, message: 'Tidak ada file yang diunggah' });
+        .status(404)
+        .json({ success: false, message: 'Pengguna tidak ditemukan' });
     }
 
-    try {
+    if (name) {
+      user.name = name;
+    }
+
+    if (file) {
       const blob = storage.bucket(bucketName).file(file.originalname);
       const blobStream = blob.createWriteStream({
         resumable: false,
         contentType: file.mimetype,
       });
 
-      blobStream.on('error', (err) => {
-        console.error(err);
-        return res
-          .status(500)
-          .json({ success: false, message: 'Gagal upload ke GCS' });
-      });
-
-      blobStream.on('finish', async () => {
-        const photoUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`.replace(/\s+/g, '');
-
-        const user = await User.findByIdAndUpdate(
-          userId,
-          { photoUrl },
-          { new: true }
-        );
-
-        if (!user) {
-          return res
-            .status(404)
-            .json({ success: false, message: 'User tidak ditemukan' });
-        }
-
-        res.status(200).json({
-          success: true,
-          message: 'Foto profil berhasil diubah',
-          photoUrl,
+      await new Promise((resolve, reject) => {
+        blobStream.on('error', (err) => {
+          console.error(err);
+          reject(new Error('Gagal upload, pilih ulang gambar profile anda'));
         });
-      });
 
-      blobStream.end(file.buffer);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: error.message });
+        blobStream.on('finish', async () => {
+          user.photoUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`.replace(/\s+/g, '');
+          resolve();
+        });
+
+        blobStream.end(file.buffer);
+      });
     }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profil user berhasil diperbarui',
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
   }
-);
+});
 
 router.delete('/delete-profile-photo', async (req, res) => {
   const { userId } = req.body;
