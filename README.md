@@ -39,7 +39,8 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 ```json
 {
   "success": true,
-  "message": "Kode OTP telah dikirim ke email Anda"
+  "message": "Kode OTP telah dikirim ke email Anda",
+  "otp": 123456
 }
 ```
 
@@ -47,15 +48,14 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 
 ### 2. **Register OTP VERIFIER**
 
-**URL:** `POST /auth/verify-otp`  
-**Endpoint:** [http://localhost:33000/auth/verify-otp](http://localhost:33000/auth/verify-otp)  
+**URL:** `POST /auth/verify-register`  
+**Endpoint:** [http://localhost:33000/auth/verify-register](http://localhost:33000/auth/verify-register)  
 **Request:**
 
 ```json
 {
   "email": "didallforus@gmail.com",
-  "otp": "17519",
-  "password": "password123"
+  "otp": "17519"
 }
 ```
 
