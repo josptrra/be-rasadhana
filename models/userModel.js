@@ -5,7 +5,7 @@ const userDetailSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     password: { type: String },
-    photo: { type: mongoose.Schema.Types.ObjectId, ref: 'fs.files' },
+    photoUrl: { type: String },
     resetToken: String,
     registrationOtp: String,
     otpExpiration: Date,
