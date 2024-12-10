@@ -55,7 +55,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 ```json
 {
   "email": "didallforus@gmail.com",
-  "otp": "17519"
+  "otp": "17519",
 }
 ```
 
