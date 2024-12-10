@@ -12,6 +12,11 @@ dotenv.config();
 
 const router = express.Router();
 
+const storage = new Storage();
+const bucketName = process.env.GCLOUD_BUCKET_USER_PROFILE;
+const upload = multer({ storage: multer.memoryStorage() });
+const defaultPhotoUrl = `https://storage.googleapis.com/${bucketName}/default-profile.jpg`;
+
 const usersPendingVerification = new Map(); // Untuk menyimpan data sementara
 
 async function sendEmail(to, subject, text) {
@@ -89,7 +94,11 @@ router.post('/verify-register', async (req, res) => {
     const user = new User({
       name: userPending.name,
       email,
-      password: userPending.password,
+      password: userPending.encryptedPassword,
+      resetToken: null,
+      registrationOtp: userPending.otp,
+      otpExpiration: userPending.otpExpiration,
+      photoUrl: defaultPhotoUrl,
     });
 
     await user.save();
