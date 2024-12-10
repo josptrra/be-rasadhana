@@ -98,7 +98,7 @@ router.post('/verify-register', async (req, res) => {
       resetToken: null,
       registrationOtp: userPending.otp,
       otpExpiration: userPending.otpExpiration,
-      photoUrl: defaultPhotoUrl,
+      photoUrl: defaultPhotoUrl.trim(),
     });
 
     await user.save();
