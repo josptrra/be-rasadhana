@@ -15,7 +15,7 @@ const router = express.Router();
 const storage = new Storage();
 const bucketName = process.env.GCLOUD_BUCKET_USER_PROFILE;
 const upload = multer({ storage: multer.memoryStorage() });
-const defaultPhotoUrl = `https://storage.googleapis.com/${bucketName}/default-profile.jpg`;
+const defaultPhotoUrl = `https://storage.googleapis.com/${bucketName}/default-profile.jpg`.trim();
 
 const usersPendingVerification = new Map(); // Untuk menyimpan data sementara
 
@@ -103,6 +103,10 @@ router.post('/verify-register', async (req, res) => {
       .json({ success: false, message: 'OTP sudah kedaluwarsa' });
   }
 
+  const cleanedPhotoUrl = defaultPhotoUrl.replace(/\s+/g, '');
+
+  console.log(`defaultPhoto: ${defaultPhotoUrl}`)
+  
   try {
     const user = new User({
       name: userPending.name,
@@ -111,8 +115,10 @@ router.post('/verify-register', async (req, res) => {
       resetToken: null,
       registrationOtp: userPending.otp,
       otpExpiration: userPending.otpExpiration,
-      photoUrl: defaultPhotoUrl.trim(),
+      photoUrl: cleanedPhotoUrl,
     });
+
+    console.log(`userPhoto: ${user.photoUrl}`)
 
     await user.save();
     usersPendingVerification.delete(email);
@@ -174,6 +180,9 @@ router.get('/userdata', async (req, res) => {
     const { email } = decodedToken;
 
     const user = await User.findOne({ email });
+
+    console.log(user)
+
     if (!user) {
       return res
         .status(404)
@@ -295,7 +304,7 @@ router.patch(
       });
 
       blobStream.on('finish', async () => {
-        const photoUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
+        const photoUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`.replace(/\s+/g, '');
 
         const user = await User.findByIdAndUpdate(
           userId,
