@@ -18,6 +18,9 @@ if (!process.env.MONGO_URL) {
 if (!process.env.GCLOUD_BUCKET_NAME) {
   throw new Error('GCLOUD_BUCKET_NAME is not set in .env');
 }
+if (!process.env.GCLOUD_BUCKET_NAME_RECIPES) {
+  throw new Error('GCLOUD_BUCKET_NAME_RECIPES is not set in .env');
+}
 
 // Middleware untuk parsing application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));

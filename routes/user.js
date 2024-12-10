@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 import { Storage } from '@google-cloud/storage';
-import { User } from '../models/userModel.js';
+import { User } from '/models/userModel.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';

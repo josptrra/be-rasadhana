@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { Recipe } from '../models/recipeModel.js';
+import { Recipe } from '/models/recipeModel';
 import { Storage } from '@google-cloud/storage';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
