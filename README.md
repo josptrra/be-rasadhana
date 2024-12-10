@@ -113,11 +113,15 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 {
   "success": true,
   "data": {
-    "_id": "6741b6fc61ae0a167581214e",
-    "name": "Julio",
-    "email": "juliosp2107@gmail.com",
-    "__v": 0,
-    "resetToken": "24938"
+    "_id": "6757a47c6e64cc0fc0fbc1a3",
+    "name": "juliooo",
+    "email": "julioredf@gmail.com",
+    "password": "$2b$10$.gAvf43s.L7BoTAeSwl0G.Zj9HBh.no2JYV33P43Zcyzj09BiSxEO",
+    "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/default-profile.jpg",
+    "resetToken": null,
+    "registrationOtp": null,
+    "otpExpiration": null,
+    "__v": 0
   }
 }
 ```
