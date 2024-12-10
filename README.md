@@ -55,7 +55,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 ```json
 {
   "email": "didallforus@gmail.com",
-  "otp": "17519",
+  "otp": "17519"
 }
 ```
 
@@ -89,7 +89,8 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 {
   "success": true,
   "message": "Login berhasil",
-  "data": "JWT_TOKEN"
+  "token": "",
+  "expireToken": "2024-12-17T15:02:04.000Z"
 }
 ```
 
@@ -113,16 +114,17 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 {
   "success": true,
   "data": {
-    "_id": "6757a47c6e64cc0fc0fbc1a3",
+    "_id": "675855ace760c04d86071194",
     "name": "juliooo",
     "email": "julioredf@gmail.com",
-    "password": "$2b$10$.gAvf43s.L7BoTAeSwl0G.Zj9HBh.no2JYV33P43Zcyzj09BiSxEO",
-    "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/default-profile.jpg",
+    "password": "",
+    "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile\n/default-profile.jpg",
     "resetToken": null,
     "registrationOtp": null,
-    "otpExpiration": null,
+    "otpExpiration": "2024-12-10T15:01:11.938Z",
     "__v": 0
-  }
+  },
+  "expireToken": "2024-12-17T15:02:04.000Z"
 }
 ```
 
