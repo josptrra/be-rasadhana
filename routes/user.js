@@ -1,11 +1,22 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
+import multer from 'multer';
+import { Storage } from '@google-cloud/storage';
 import { User } from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = express.Router();
+
+const storage = new Storage();
+const bucketName = process.env.GCLOUD_BUCKET_USER_PROFILE;
+const upload = multer({ storage: multer.memoryStorage() });
+
+const defaultPhotoUrl = `https://storage.googleapis.com/${bucketName}/default-profile.jpg`;
 
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
@@ -27,6 +38,7 @@ router.post('/register', async (req, res) => {
       resetToken: null,
       registrationOtp: otp,
       otpExpiration: otpExpiration,
+      photoUrl: defaultPhotoUrl,
     });
 
     await user.save();
@@ -53,7 +65,7 @@ router.post('/register', async (req, res) => {
         return res.json({
           success: true,
           message: 'Kode OTP telah dikirim ke email Anda',
-          otp
+          otp,
         });
       }
     });
@@ -65,7 +77,6 @@ router.post('/register', async (req, res) => {
 router.post('/verify-otp', async (req, res) => {
   const { email, otp, password } = req.body;
 
-  // Cari user berdasarkan email
   const user = await User.findOne({ email });
 
   if (!user) {
@@ -74,24 +85,21 @@ router.post('/verify-otp', async (req, res) => {
       .json({ success: false, message: 'Email tidak terdaftar' });
   }
 
-  // Cek apakah OTP yang dimasukkan sesuai dengan yang disimpan dan apakah sudah kedaluwarsa
   if (user.registrationOtp !== otp) {
     return res.status(400).json({ success: false, message: 'OTP tidak valid' });
   }
 
-  // Cek apakah OTP sudah kedaluwarsa
   if (new Date() > new Date(user.otpExpiration)) {
     return res
       .status(400)
       .json({ success: false, message: 'OTP sudah kedaluwarsa' });
   }
 
-  // Simpan password setelah OTP divalidasi
   const encryptedPassword = await bcrypt.hash(password, 10);
 
   user.password = encryptedPassword;
-  user.registrationOtp = null; // Hapus OTP setelah verifikasi berhasil
-  user.otpExpiration = null; // Hapus waktu kedaluwarsa OTP
+  user.registrationOtp = null;
+  user.otpExpiration = null;
   await user.save();
 
   return res.status(200).json({
@@ -261,6 +269,89 @@ router.post('/reset-password', async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: 'Gagal mereset password' });
+  }
+});
+
+router.patch(
+  '/update-profile-photo',
+  upload.single('photo'),
+  async (req, res) => {
+    const { userId } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Tidak ada file yang diunggah' });
+    }
+
+    try {
+      const blob = storage.bucket(bucketName).file(file.originalname);
+      const blobStream = blob.createWriteStream({
+        resumable: false,
+        contentType: file.mimetype,
+      });
+
+      blobStream.on('error', (err) => {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ success: false, message: 'Gagal upload ke GCS' });
+      });
+
+      blobStream.on('finish', async () => {
+        const photoUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
+
+        const user = await User.findByIdAndUpdate(
+          userId,
+          { photoUrl },
+          { new: true }
+        );
+
+        if (!user) {
+          return res
+            .status(404)
+            .json({ success: false, message: 'User tidak ditemukan' });
+        }
+
+        res.status(200).json({
+          success: true,
+          message: 'Foto profil berhasil diubah',
+          photoUrl,
+        });
+      });
+
+      blobStream.end(file.buffer);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+);
+
+router.delete('/delete-profile-photo', async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'User tidak ditemukan' });
+    }
+
+    user.photoUrl = defaultPhotoUrl;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Foto profil berhasil dihapus',
+      photoUrl: defaultPhotoUrl,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
