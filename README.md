@@ -118,7 +118,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
     "name": "juliooo",
     "email": "julioredf@gmail.com",
     "password": "",
-    "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile\n/default-profile.jpg",
+    "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/default-profile.jpg",
     "resetToken": null,
     "registrationOtp": null,
     "otpExpiration": "2024-12-10T15:01:11.938Z",
