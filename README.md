@@ -209,7 +209,56 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
-### 8. **Upload Photos**
+---
+
+### 8. **Update User PFP**
+
+**URL:** `Patch /auth/update-profile-photo`  
+**Endpoint:** [http://localhost:33000/auth/update-profile-photo](http://localhost:33000/auth/update-profile-photo)
+**Request: Body: form-data**
+
+```json
+1. Key = userId, type = text, value = userId
+2. Key = photo, type = file, value = input file
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Foto profil berhasil diubah",
+  "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/Screenshot 2022-12-21 030957.png"
+}
+```
+
+---
+
+### 9. **Delete User PFP - Back to default**
+
+**URL:** `POST /auth/delete-profile-photo`  
+**Endpoint:** [http://localhost:33000/auth/delete-profile-photo](http://localhost:33000/auth/delete-profile-photo)  
+**Request:**
+
+```json
+{
+  "userId": ""
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Foto profil berhasil dihapus",
+  "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/default-profile.jpg"
+}
+```
+
+---
+
+### 10. **Upload Ingredients Photos**
 
 **URL:** `Post /photos/upload-photo`  
 **Endpoint:** [http://localhost:33000/photos/upload-photo](http://localhost:33000/auth/update/:userId)
@@ -230,7 +279,9 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
-### 9. **Get All Photos by UserID**
+---
+
+### 11. **Get All Photos by UserID**
 
 **URL:** `GET /photos/:userId`  
 **Endpoint:** [http://localhost:33000/photos/:userId](http://localhost:33000/photos/:userId)
@@ -260,7 +311,9 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
-### 10. **POST CREATE Recipe - Homepage**
+---
+
+### 12. **POST CREATE Recipe - Homepage**
 
 **URL:** `POST /recipes/create-recipe`  
 **Endpoint:** [http://localhost:33000/recipes/create-recipe](http://localhost:33000/recipes/create-recipe)
@@ -283,7 +336,9 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 }
 ```
 
-### 11. **GET All Recipe - Homepage**
+---
+
+### 13. **GET All Recipe - Homepage**
 
 **URL:** `GET /recipes/allrecipe`  
 **Endpoint:** [http://localhost:33000/recipes/allrecipe](http://localhost:33000/recipes/allrecipe)
