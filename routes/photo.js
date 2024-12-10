@@ -1,29 +1,30 @@
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
 import { Storage } from '@google-cloud/storage';
-import { UserPhoto } from '/models/uploadPhotoModel';
+import { UserPhoto } from '../models/uploadPhotoModel.js';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 
-// Jika menjalankan di lokal
-// const __dirname = path.dirname(__filename);
+// Jika menjalankan di local
+const __dirname = path.dirname(__filename);
 
-// process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
-//   __dirname,
-//   '../config/service-account-key.json'
-// );
+process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
+  __dirname,
+  '../config/service-account-key.json'
+);
 
 const router = express.Router();
+
 const storage = new Storage();
 const bucketName = process.env.GCLOUD_BUCKET_NAME;
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Route untuk upload foto
+// Endpoint untuk upload foto
 router.post('/upload-photo', upload.single('photo'), async (req, res) => {
   const { userId } = req.body;
   const file = req.file;
@@ -35,7 +36,6 @@ router.post('/upload-photo', upload.single('photo'), async (req, res) => {
   }
 
   try {
-    // Upload foto ke GCS
     const blob = storage.bucket(bucketName).file(file.originalname);
     const blobStream = blob.createWriteStream({
       resumable: false,
@@ -50,10 +50,8 @@ router.post('/upload-photo', upload.single('photo'), async (req, res) => {
     });
 
     blobStream.on('finish', async () => {
-      // URL foto yang dapat diakses secara publik
       const photoUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
 
-      // Menyimpan URL foto ke MongoDB
       const newPhoto = new UserPhoto({
         userId,
         photoUrl,
@@ -74,7 +72,7 @@ router.post('/upload-photo', upload.single('photo'), async (req, res) => {
   }
 });
 
-// Route untuk mengambil semua foto berdasarkan userId
+// Endpoint untuk mendapatkan daftar foto user berdasarkan userId
 router.get('/:userId', async (req, res) => {
   const { userId } = req.params;
 
