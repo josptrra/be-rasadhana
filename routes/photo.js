@@ -13,11 +13,6 @@ const __filename = fileURLToPath(import.meta.url);
 // Jika menjalankan di local
 const __dirname = path.dirname(__filename);
 
-process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
-  __dirname,
-  '../config/service-account-key.json'
-);
-
 const router = express.Router();
 
 const storage = new Storage();

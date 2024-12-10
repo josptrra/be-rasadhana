@@ -15,11 +15,6 @@ const __filename = fileURLToPath(import.meta.url);
 // kalo mau jalanin di localmenjalankan di local
 const __dirname = path.dirname(__filename);
 
-process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
-  __dirname,
-  '../config/service-account-key.json'
-);
-
 const storage = new Storage();
 const recipeBucketName = process.env.GCLOUD_BUCKET_NAME_RECIPES;
 const upload = multer({ storage: multer.memoryStorage() });
