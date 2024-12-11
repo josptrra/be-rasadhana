@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import { UserRouter } from './routes/user.js';
 import { PhotoRouter } from './routes/photo.js';
 import { RecipeRouter } from './routes/recipe.js';
+import { serve, setup } from 'swagger-ui-express';
+import swaggerSpec from './swagger.js';
 
 import mongoose from 'mongoose';
 
@@ -19,7 +21,7 @@ if (!process.env.GCLOUD_BUCKET_NAME) {
   throw new Error('GCLOUD_BUCKET_NAME is not set in .env');
 }
 
-// unkomen jika mau menjalankan di local
+// Un-comment if you want to run it locally
 if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   throw new Error(
     'GOOGLE_APPLICATION_CREDENTIALS is not set or file is missing'
@@ -29,7 +31,7 @@ if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
 process.env.GOOGLE_APPLICATION_CREDENTIALS =
   './config/service-account-key.json';
 
-// Middleware untuk parsing application/x-www-form-urlencoded
+app.use('/api-docs', serve, setup(swaggerSpec));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -47,7 +49,9 @@ app.use('/photos', PhotoRouter);
 app.use('/recipes', RecipeRouter);
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the API Rasadhana versi 1.0');
+  res.send(
+    'Welcome to the API Rasadhana version 1.0 <br>Kindly visit our /api-docs for our API Documentations'
+  );
 });
 
 app.listen(PORT, () => {

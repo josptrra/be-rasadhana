@@ -194,24 +194,23 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 3. Key = name, type = text, value = your name
 ```
 
-
 **Response:**
 
 ```json
 {
-    "success": true,
-    "message": "Profil user berhasil diperbarui",
-    "user": {
-        "_id": "67587279b73efb53e4761b38",
-        "name": "Mizz Update",
-        "email": "akumalaka63@gmail.com",
-        "password": "$2b$10$SxYuppayqLDTREgrsawBHOQTISbdg3ZSq5iQcP7XcQz3nbYZ7qAy.",
-        "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/cc01493c-6a04-4bea-b33d-3be0086c9f09_169.jpeg",
-        "resetToken": null,
-        "registrationOtp": "35602",
-        "otpExpiration": "2024-12-10T17:04:59.949Z",
-        "__v": 0
-    }
+  "success": true,
+  "message": "Profil user berhasil diperbarui",
+  "user": {
+    "_id": "67587279b73efb53e4761b38",
+    "name": "Mizz Update",
+    "email": "akumalaka63@gmail.com",
+    "password": "$2b$10$SxYuppayqLDTREgrsawBHOQTISbdg3ZSq5iQcP7XcQz3nbYZ7qAy.",
+    "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/cc01493c-6a04-4bea-b33d-3be0086c9f09_169.jpeg",
+    "resetToken": null,
+    "registrationOtp": "35602",
+    "otpExpiration": "2024-12-10T17:04:59.949Z",
+    "__v": 0
+  }
 }
 ```
 

@@ -24,7 +24,47 @@ const storage = new Storage();
 const bucketName = process.env.GCLOUD_BUCKET_NAME;
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Endpoint untuk upload foto
+/**
+ * @swagger
+ * /photos/upload-photo:
+ *   post:
+ *     summary: User upload an ingredient's photos.
+ *     description: Uploads a photo file to Google Cloud Storage and associates the photo URL with the user's ID in the database.
+ *     tags: [Endpoints Associated with ML Models]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: The unique identifier of the user to associate the photo with.
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *                 description: The photo file to upload.
+ *     responses:
+ *       201:
+ *         description: The photo was uploaded successfully and the URL was saved.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 photoUrl:
+ *                   type: string
+ *                   description: The URL of the uploaded photo.
+ *       400:
+ *         description: No file was uploaded.
+ *       500:
+ *         description: Failed to upload the photo to Google Cloud Storage or save the photo URL to the database.
+ */
 router.post('/upload-photo', upload.single('photo'), async (req, res) => {
   const { userId } = req.body;
   const file = req.file;
@@ -72,7 +112,40 @@ router.post('/upload-photo', upload.single('photo'), async (req, res) => {
   }
 });
 
-// Endpoint untuk mendapatkan daftar foto user berdasarkan userId
+/**
+ * @swagger
+ * /photos/{userId}:
+ *   get:
+ *     summary: Retrieve user's ingredients photos
+ *     description: Fetches all the photos associated with a given user ID from the database.
+ *     tags: [Endpoints Associated with ML Models]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID whose photos are to be retrieved.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the photos for the user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/IngredientsPhoto'
+ *                   description: A list of photos associated with the user.
+ *       404:
+ *         description: No photos found for the user.
+ *       500:
+ *         description: Internal server error occurred while trying to retrieve photos.
+ */
 router.get('/:userId', async (req, res) => {
   const { userId } = req.params;
 
@@ -90,7 +163,38 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
-// Route untuk mengambil foto terbaru berdasarkan userId
+/**
+ * @swagger
+ * /photos/latest/{userId}:
+ *   get:
+ *     summary: Retrieve the latest photo of ingredients user uploaded
+ *     description: Fetches the most recently uploaded photo by the specified user, sorted by the upload date.
+ *     tags: [Endpoints Associated with ML Models]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID to fetch the latest photo for.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the latest photo for the user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/IngredientsPhoto'
+ *                   description: The most recent photo of the user.
+ *       404:
+ *         description: No photos found for the user.
+ *       500:
+ *         description: Internal server error occurred while trying to fetch the latest photo.
+ */
 router.get('/latest/:userId', async (req, res) => {
   const { userId } = req.params;
 
