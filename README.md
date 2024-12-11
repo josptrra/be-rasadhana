@@ -55,7 +55,7 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 ```json
 {
   "email": "didallforus@gmail.com",
-  "otp": "17519",
+  "otp": "17519"
 }
 ```
 
@@ -89,7 +89,8 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 {
   "success": true,
   "message": "Login berhasil",
-  "data": "JWT_TOKEN"
+  "token": "",
+  "expireToken": "2024-12-17T15:02:04.000Z"
 }
 ```
 
@@ -113,12 +114,17 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 {
   "success": true,
   "data": {
-    "_id": "6741b6fc61ae0a167581214e",
-    "name": "Julio",
-    "email": "juliosp2107@gmail.com",
-    "__v": 0,
-    "resetToken": "24938"
-  }
+    "_id": "675855ace760c04d86071194",
+    "name": "juliooo",
+    "email": "julioredf@gmail.com",
+    "password": "",
+    "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/default-profile.jpg",
+    "resetToken": null,
+    "registrationOtp": null,
+    "otpExpiration": "2024-12-10T15:01:11.938Z",
+    "__v": 0
+  },
+  "expireToken": "2024-12-17T15:02:04.000Z"
 }
 ```
 
@@ -176,59 +182,36 @@ Berikut adalah daftar endpoint beserta request dan response yang tersedia dalam 
 
 **URL:** `PATCH /auth/update/:userId`  
 **Endpoint:** [http://localhost:33000/auth/update/:userId](http://localhost:33000/auth/update/:userId)
-**Request: Headers:**
+<br>
 
-```json
-{
-  "Authorization": "Bearer JWT_TOKEN"
-}
-```
+**Request: Body: form-data**
 
 **Request:**
 
 ```json
-{
-  "name": "Nama Baru"
-}
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "user": {
-    "_id": "6741b6fc61ae0a167581214e",
-    "name": "Julio Syah Putraaaa",
-    "email": "juliosp2107@gmail.com",
-    "password": "$2b$10$of8QqcmRUV/.MVtgxC8LjOm3l8RqBtZtpNV1gvIRZ5cHVNMV1xg2.",
-    "__v": 0,
-    "resetToken": null
-  },
-  "message": "Nama berhasil diupdate"
-}
-```
-
----
-
-### 8. **Update User PFP**
-
-**URL:** `Patch /auth/update-profile-photo`  
-**Endpoint:** [http://localhost:33000/auth/update-profile-photo](http://localhost:33000/auth/update-profile-photo)
-**Request: Body: form-data**
-
-```json
 1. Key = userId, type = text, value = userId
 2. Key = photo, type = file, value = input file
+3. Key = name, type = text, value = your name
 ```
+
 
 **Response:**
 
 ```json
 {
-  "success": true,
-  "message": "Foto profil berhasil diubah",
-  "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/Screenshot 2022-12-21 030957.png"
+    "success": true,
+    "message": "Profil user berhasil diperbarui",
+    "user": {
+        "_id": "67587279b73efb53e4761b38",
+        "name": "Mizz Update",
+        "email": "akumalaka63@gmail.com",
+        "password": "$2b$10$SxYuppayqLDTREgrsawBHOQTISbdg3ZSq5iQcP7XcQz3nbYZ7qAy.",
+        "photoUrl": "https://storage.googleapis.com/rasadhana-app-profile/cc01493c-6a04-4bea-b33d-3be0086c9f09_169.jpeg",
+        "resetToken": null,
+        "registrationOtp": "35602",
+        "otpExpiration": "2024-12-10T17:04:59.949Z",
+        "__v": 0
+    }
 }
 ```
 
