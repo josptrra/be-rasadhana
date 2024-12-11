@@ -15,7 +15,8 @@ const router = express.Router();
 const storage = new Storage();
 const bucketName = process.env.GCLOUD_BUCKET_USER_PROFILE;
 const upload = multer({ storage: multer.memoryStorage() });
-const defaultPhotoUrl = `https://storage.googleapis.com/${bucketName}/default-profile.jpg`.trim();
+const defaultPhotoUrl =
+  `https://storage.googleapis.com/${bucketName}/default-profile.jpg`.trim();
 
 const usersPendingVerification = new Map(); // Untuk menyimpan data sementara
 
@@ -46,6 +47,59 @@ async function hashPassword(password) {
   return bcrypt.hash(password, 10);
 }
 
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     description: Registers a new user with their name, email, and password. If the email is not already in use, an OTP is sent to the email for verification purposes.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Full name of the user
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email address to register, must be unique
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Password for the account, which will be hashed before storage
+ *     responses:
+ *       200:
+ *         description: OTP sent to the email successfully for verification. The OTP needs to be used to complete registration.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 otp:
+ *                   type: string
+ *                   description: OTP sent to user's email for verification (not recommended in production)
+ *               example:
+ *                 success: true
+ *                 message: "Kode OTP telah dikirim ke email Anda"
+ *                 otp: "12345"
+ *       400:
+ *         description: Email already in use or other input validation errors.
+ *       500:
+ *         description: Failed to send the email or other server-side error.
+ */
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -80,6 +134,52 @@ router.post('/register', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /auth/verify-register:
+ *   post:
+ *     summary: Verify registration OTP
+ *     description: Verifies the OTP sent to the user during the registration process. If the OTP is valid and has not expired, completes the user registration.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address associated with the pending registration.
+ *               otp:
+ *                 type: string
+ *                 description: The OTP sent to the user's email for verification.
+ *     responses:
+ *       200:
+ *         description: Registration completed successfully. User account has been created.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 success: true
+ *                 message: "Pendaftaran berhasil, akun telah dibuat"
+ *       400:
+ *         description: OTP not valid or has expired.
+ *       404:
+ *         description: Email not registered or OTP has expired.
+ *       500:
+ *         description: An error occurred while creating the account.
+ */
 router.post('/verify-register', async (req, res) => {
   const { email, otp } = req.body;
 
@@ -105,8 +205,8 @@ router.post('/verify-register', async (req, res) => {
 
   const cleanedPhotoUrl = defaultPhotoUrl.replace(/\s+/g, '');
 
-  console.log(`defaultPhoto: ${defaultPhotoUrl}`)
-  
+  console.log(`defaultPhoto: ${defaultPhotoUrl}`);
+
   try {
     const user = new User({
       name: userPending.name,
@@ -118,7 +218,7 @@ router.post('/verify-register', async (req, res) => {
       photoUrl: cleanedPhotoUrl,
     });
 
-    console.log(`userPhoto: ${user.photoUrl}`)
+    console.log(`userPhoto: ${user.photoUrl}`);
 
     await user.save();
     usersPendingVerification.delete(email);
@@ -134,6 +234,60 @@ router.post('/verify-register', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /auth/login-user:
+ *   post:
+ *     summary: Log in a user
+ *     description: Logs in a user by checking the provided email and password, and returns a JWT token if the credentials are valid.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The user's email address
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: The user's password
+ *     responses:
+ *       200:
+ *         description: Login successful, JWT token issued.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                   description: JWT token for accessing protected routes
+ *                 expireToken:
+ *                   type: string
+ *                   format: date-time
+ *                   description: Expiration time of the token
+ *               example:
+ *                 success: true
+ *                 message: "Login berhasil"
+ *                 token: ""
+ *                 expireToken: "2024-12-17T15:02:04.000Z"
+ *       404:
+ *         description: Email not found.
+ *       401:
+ *         description: Incorrect password.
+ */
 router.post('/login-user', async (req, res) => {
   const { email, password } = req.body;
 
@@ -166,6 +320,40 @@ router.post('/login-user', async (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /auth/userdata:
+ *   get:
+ *     summary: Retrieve user data
+ *     description: Returns the data of the user associated with the provided JWT token.
+ *     tags: [User Management]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *                 expireToken:
+ *                   type: string
+ *                   format: date-time
+ *                   description: The expiration time of the provided token.
+ *       400:
+ *         description: No token found in the request headers.
+ *       401:
+ *         description: Unauthorized access - Token is expired or invalid.
+ *       404:
+ *         description: User not found in the database.
+ *       500:
+ *         description: Internal server error.
+ */
 router.get('/userdata', async (req, res) => {
   try {
     const token = req.headers.authorization?.split('Bearer ')[1];
@@ -181,7 +369,7 @@ router.get('/userdata', async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    console.log(user)
+    console.log(user);
 
     if (!user) {
       return res
@@ -208,6 +396,47 @@ router.get('/userdata', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     description: |
+ *       Sends a password reset OTP to the user's email if it is registered. Note: Typically, the OTP should not be included in the response for security reasons.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email address of the user requesting a password reset.
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully. Check your email to proceed with the password reset.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 otp:
+ *                   type: string
+ *                   description: OTP sent to user's email.
+ *       404:
+ *         description: Email not registered in the database.
+ *       500:
+ *         description: Failed to send the email due to a server error.
+ */
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
@@ -230,6 +459,47 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset the user's password
+ *     description: Allows users to reset their password by providing a valid OTP and a new password.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - otp
+ *               - newPassword
+ *             properties:
+ *               otp:
+ *                 type: string
+ *                 description: The one-time password provided for password reset verification.
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: The new password to be set for the user.
+ *     responses:
+ *       200:
+ *         description: Password reset successfully. User can now log in with the new password.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid OTP provided, password reset not possible.
+ *       500:
+ *         description: Internal server error during the password reset process.
+ */
 router.post('/reset-password', async (req, res) => {
   const { otp, newPassword } = req.body;
 
@@ -247,6 +517,55 @@ router.post('/reset-password', async (req, res) => {
     .json({ success: true, message: 'Password berhasil direset' });
 });
 
+/**
+ * @swagger
+ * /auth/update/{userId}:
+ *   patch:
+ *     summary: Update user profile
+ *     description: Updates the user's profile information, including name and profile photo. The photo is optional.
+ *     tags: [User Management]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The new name of the user.
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *                 description: The new profile photo to upload.
+ *     responses:
+ *       200:
+ *         description: User profile updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Invalid input, data formats are not correct.
+ *       404:
+ *         description: User not found.
+ *       500:
+ *         description: Failed to update the user due to server error or failed upload.
+ */
 router.patch('/update/:userId', upload.single('photo'), async (req, res) => {
   const { userId } = req.params;
   const { name } = req.body;
@@ -279,7 +598,11 @@ router.patch('/update/:userId', upload.single('photo'), async (req, res) => {
         });
 
         blobStream.on('finish', async () => {
-          user.photoUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`.replace(/\s+/g, '');
+          user.photoUrl =
+            `https://storage.googleapis.com/${bucketName}/${blob.name}`.replace(
+              /\s+/g,
+              ''
+            );
           resolve();
         });
 
@@ -300,6 +623,45 @@ router.patch('/update/:userId', upload.single('photo'), async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /auth/delete-profile-photo:
+ *   delete:
+ *     summary: Delete user's profile photo
+ *     description: Removes the user's profile photo and resets it to the default photo URL.
+ *     tags: [User Management]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: The user ID whose profile photo is to be deleted.
+ *     responses:
+ *       200:
+ *         description: Profile photo successfully deleted and reset to default.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 photoUrl:
+ *                   type: string
+ *                   description: The new URL of the default photo.
+ *       404:
+ *         description: User not found.
+ *       500:
+ *         description: Server error occurred while deleting the profile photo.
+ */
 router.delete('/delete-profile-photo', async (req, res) => {
   const { userId } = req.body;
 
