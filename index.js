@@ -21,7 +21,7 @@ if (!process.env.GCLOUD_BUCKET_NAME) {
   throw new Error('GCLOUD_BUCKET_NAME is not set in .env');
 }
 
-// Un-comment if you want to run it locally
+// // Un-comment if you want to run it locally
 // if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
 //   throw new Error(
 //     'GOOGLE_APPLICATION_CREDENTIALS is not set or file is missing'
@@ -31,7 +31,6 @@ if (!process.env.GCLOUD_BUCKET_NAME) {
 // process.env.GOOGLE_APPLICATION_CREDENTIALS =
 //   './config/service-account-key.json';
 
-app.use('/', serve, setup(swaggerSpec));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -44,6 +43,11 @@ mongoose
     console.log(e);
   });
 
+app.use('/api-docs', serve, setup(swaggerSpec));
+
+app.get('/', (req, res) => {
+  res.redirect('/api-docs');
+});
 app.use('/auth', UserRouter);
 app.use('/photos', PhotoRouter);
 app.use('/recipes', RecipeRouter);
