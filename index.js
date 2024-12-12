@@ -31,7 +31,6 @@ if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
 process.env.GOOGLE_APPLICATION_CREDENTIALS =
   './config/service-account-key.json';
 
-app.use('/', serve, setup(swaggerSpec));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -44,6 +43,11 @@ mongoose
     console.log(e);
   });
 
+app.use('/api-docs', serve, setup(swaggerSpec));
+
+app.get('/', (req, res) => {
+  res.redirect('/api-docs');
+});
 app.use('/auth', UserRouter);
 app.use('/photos', PhotoRouter);
 app.use('/recipes', RecipeRouter);
