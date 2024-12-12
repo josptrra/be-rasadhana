@@ -31,7 +31,7 @@ if (!process.env.GCLOUD_BUCKET_NAME) {
 // process.env.GOOGLE_APPLICATION_CREDENTIALS =
 //   './config/service-account-key.json';
 
-app.use('/api-docs', serve, setup(swaggerSpec));
+app.use('/', serve, setup(swaggerSpec));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -47,12 +47,6 @@ mongoose
 app.use('/auth', UserRouter);
 app.use('/photos', PhotoRouter);
 app.use('/recipes', RecipeRouter);
-
-app.get('/', (req, res) => {
-  res.send(
-    'Welcome to the API Rasadhana version 1.0 <br>Kindly visit our /api-docs for our API Documentations'
-  );
-});
 
 app.listen(PORT, () => {
   console.log(`server running in http://localhost:${PORT}`);
